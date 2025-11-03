@@ -1,0 +1,1000 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso Interactivo: Cálculo Proposicional</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Font (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Librerías KaTeX para Fórmulas Matemáticas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" xintegrity="sha384-Gvrq3r5uL8vM1zFmR+N9XzM+Q8uL3BvTzK3D9+B/8v/sH4aG1p8w==" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" xintegrity="sha384-M+Q8uL3BvTzK3D9+B/8v/sH4aG1p8w==" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURPlLJSzFGFCKbF/0LvOItVICMKllssLcEcYClvT9iUqXbZ0QuEW/r" crossorigin="anonymous"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* Fondo gris claro para la página */
+        }
+        
+        /* Estilos para la barra de scroll del menú */
+        #sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        #sidebar::-webkit-scrollbar-track {
+            background: #1d4ed8; /* Azul más oscuro */
+        }
+        #sidebar::-webkit-scrollbar-thumb {
+            background-color: #f97316; /* Naranja */
+            border-radius: 20px;
+        }
+
+        /* Estilo para el link activo en el menú */
+        #sidebar .nav-link.active {
+            background-color: white;
+            color: #2563eb; /* Azul */
+            font-weight: 700;
+            transform: scale(1.05);
+        }
+
+        /* Estilos del Quiz */
+        .quiz {
+            background-color: #eff6ff; /* Azul muy claro */
+            border-left: 5px solid #3b82f6; /* Azul */
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+        }
+        .quiz-question {
+            font-weight: 600;
+            color: #1e3a8a; /* Azul oscuro */
+            margin-bottom: 0.75rem;
+        }
+        .quiz-options li {
+            padding: 0.25rem 0;
+        }
+        .quiz-answer {
+            background-color: #dbeafe; /* Azul un poco más oscuro */
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+            border: 1px solid #93c5fd;
+        }
+
+        /* Estilos del Juego de Memoria */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            max-width: 500px;
+            margin: 1.5rem auto 0;
+        }
+        .card {
+            background-color: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+            height: 100px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .card .card-content {
+            display: none; /* Oculto por defecto */
+            font-size: 1.25rem; /* Tamaño más pequeño para texto */
+            padding: 0.5rem;
+            text-align: center;
+        }
+        .card.flipped {
+            background-color: #ffffff;
+            transform: rotateY(180deg);
+        }
+        .card.flipped .card-content {
+            display: block;
+            transform: rotateY(180deg); /* Voltear el texto de nuevo */
+        }
+        .card.matched {
+            background-color: #f97316; /* Naranja */
+            color: white;
+            border-color: #f97316;
+            cursor: default;
+        }
+        .card.matched .card-content {
+            display: block;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Botón del Menú Móvil -->
+    <button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-orange-500 text-white p-3 rounded-lg shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Contenedor Principal (Sidebar + Contenido) -->
+    <div class="flex flex-col md:flex-row">
+
+        <!-- ===== Sidebar (Menú Izquierdo) ===== -->
+        <nav id="sidebar" class="w-full md:w-64 lg:w-72 bg-blue-600 text-white p-5 md:fixed md:h-screen md:overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40">
+            <h2 class="text-2xl font-bold mb-6 mt-12 md:mt-0 text-center">Temario 📚</h2>
+            <ul class="space-y-2">
+                <li><a href="#tema-1" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">1. Introducción 🚀</a></li>
+                <li><a href="#tema-2" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">2. ¿Qué es el Cálculo? 🤔</a></li>
+                <li><a href="#tema-3" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">3. Proposiciones Atómicas 💡</a></li>
+                <li><a href="#tema-4" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">4. Conectivas (¬, ∧)</a></li>
+                <li><a href="#tema-5" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">5. Conectivas (∨)</a></li>
+                <li><a href="#tema-6" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">6. Conectivas (→) 🧠</a></li>
+                <li><a href="#tema-7" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">7. Conectivas (↔)</a></li>
+                <li><a href="#tema-8" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">8. Tablas de Verdad 📋</a></li>
+                <li><a href="#tema-9" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">9. Clasificación ⚖️</a></li>
+                <li><a href="#tema-10" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">10. Aplicaciones 💻</a></li>
+                <li><a href="#tema-11" class="nav-link block p-3 rounded-lg font-medium transition-all hover:bg-blue-700">11. Resumen 🎉</a></li>
+                <li><hr class="border-t-2 border-orange-500 my-4"></li>
+                <li><a href="#juego" class="nav-link block p-3 rounded-lg font-semibold bg-orange-500 text-white text-center transition-all hover:bg-orange-600">¡A Jugar! 🧩</a></li>
+                <li><a href="#examen-final" class="nav-link block p-3 rounded-lg font-semibold bg-white text-blue-600 text-center transition-all hover:bg-gray-100">Examen Final 🏆</a></li>
+            </ul>
+        </nav>
+
+        <!-- ===== Contenido Principal (Panel Derecho) ===== -->
+        <main class="w-full bg-white md:ml-64 lg:ml-72 p-6 md:p-10 lg:p-12 min-h-screen">
+            
+            <!-- --- Tema 1: Introducción --- -->
+            <section id="tema-1" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">1. Introducción al Cálculo Proposicional 🚀</h1>
+                <p class="text-xl italic font-light text-gray-600">Fundamentos para Lógica y Algorítmica</p>
+
+                <div class="mt-8 text-lg bg-gray-50 p-6 rounded-lg shadow-sm">
+                    <p><strong>Curso:</strong> Lógica y Algorítmica</p>
+                    <p><strong>Objetivo:</strong> Entender cómo se estructuran las afirmaciones lógicas y cómo se evalúa su veracidad, sentando las bases para el pensamiento algorítmico.</p>
+                </div>
+
+                <!-- Quiz Tema 1 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) La lógica y la algorítmica no están relacionadas.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) ¿Cuál es el objetivo principal de este curso?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) Aprender a programar en Python.</li>
+                        <li>B) Memorizar tablas de verdad.</li>
+                        <li>C) Entender cómo se evalúa la veracidad de las afirmaciones.</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) Este curso es solo para matemáticos.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> La lógica es la base fundamental de la algorítmica y la programación.</p>
+                        <p><strong>2. C) Entender cómo se evalúa la veracidad de las afirmaciones.</strong></p>
+                        <p><strong>3. Falso.</strong> Es fundamental para cualquier persona en ciencias de la computación, ingeniería o filosofía.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- --- Tema 2: ¿Qué es el Cálculo Proposicional? --- -->
+            <section id="tema-2" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">2. ¿Qué es el Cálculo Proposicional? 🤔</h1>
+                
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">La Lógica de las Proposiciones</h2>
+                <p class="text-lg">El Cálculo Proposicional (o Lógica de Orden Cero) es el sistema formal más básico. Su objetivo es estudiar las relaciones de verdad entre las proposiciones.</p>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Definiciones Clave</h2>
+                <ul class="list-disc list-inside ml-4 space-y-2 text-lg">
+                    <li><strong>Símbolos Proposicionales:</strong> Variables que representan afirmaciones completas ($P$, $Q$, $R$).</li>
+                    <li><strong>Conectivas Lógicas:</strong> Operadores que combinan proposiciones (ej. $\land$, $\lor$, $\neg$).</li>
+                    <li><strong>Valores de Verdad:</strong> Solo dos posibles estados: Verdadero ($V$ o $1$) o Falso ($F$ o $0$).</li>
+                </ul>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Importancia en Algorítmica</h2>
+                <p class="text-lg">Es la base para la toma de decisiones (<code>if/else</code>), la evaluación de condiciones en bucles (<code>while</code>) y el diseño de circuitos digitales (Álgebra de Boole).</p>
+
+                <!-- Quiz Tema 2 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) El cálculo proposicional acepta "Tal Vez" como valor de verdad.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) Las variables $P$ y $Q$ se llaman...</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) Conectivas lógicas.</li>
+                        <li>B) Símbolos proposicionales.</li>
+                        <li>C) Valores de verdad.</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) El cálculo proposicional también se conoce como Lógica de Orden Cero.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Solo existen dos valores: Verdadero ($V$) o Falso ($F$).</p>
+                        <p><strong>2. B) Símbolos proposicionales.</strong></p>
+                        <p><strong>3. Verdadero.</strong></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- --- Tema 3: Proposiciones Atómicas --- -->
+            <section id="tema-3" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">3. Proposiciones Atómicas 💡</h1>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Proposición Atómica</h2>
+                <p class="text-lg">Una oración declarativa que es <em>invariablemente</em> verdadera o falsa, pero no ambas a la vez.</p>
+
+                <div class="overflow-x-auto mt-4">
+                    <table class="w-full text-left rounded-lg overflow-hidden shadow-md">
+                        <thead class="bg-blue-100">
+                            <tr>
+                                <th class="p-4 font-semibold text-blue-800">Ejemplo de Proposición</th>
+                                <th class="p-4 font-semibold text-blue-800">Valor de Verdad</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-blue-100">
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="p-4">$P$: "El sol es una estrella."</td>
+                                <td class="p-4">$V$ (Verdadero)</td>
+                            </tr>
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="p-4">$Q$: "Todos los números primos son pares."</td>
+                                <td class="p-4">$F$ (Falso)</td>
+                            </tr>
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="p-4">$R$: "Si $2 < 5$, entonces $2 + 2 = 4$."</td>
+                                <td class="p-4">(Esta es una proposición compuesta, no atómica)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Lo que NO es una Proposición</h2>
+                <ul class="list-disc list-inside ml-4 space-y-1 text-lg text-red-600 bg-red-50 p-4 rounded-lg">
+                    <li>Preguntas: "¿Cómo te llamas?"</li>
+                    <li>Órdenes: "¡Cierra la puerta!"</li>
+                    <li>Exclamaciones: "¡Qué día tan hermoso!"</li>
+                    <li>Paradojas: "Esta oración es falsa."</li>
+                </ul>
+
+                <!-- Quiz Tema 3 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) "Mañana lloverá" es una proposición atómica válida.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) ¿Cuál de las siguientes SÍ es una proposición?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) "¡Ay!"</li>
+                        <li>B) "La capital de Francia es París."</li>
+                        <li>C) "x + 5 = 10"</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) "¡Cállate!" es una proposición con valor Falso.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> No es *invariablemente* V o F en el momento de ser dicha. Su valor depende del futuro.</p>
+                        <p><strong>2. B) "La capital de Francia es París."</strong> (Es una proposición Verdadera).</p>
+                        <p><strong>3. Falso.</strong> Es una orden, no una proposición. No tiene valor de verdad.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- --- Tema 4: Conectivas: Negación y Conjunción --- -->
+            <section id="tema-4" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">4. Conectivas: Negación (¬) y Conjunción (∧)</h1>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">1. Negación ($\neg$) - *NO*</h2>
+                <p class="text-lg">Invierte el valor de verdad de una proposición.</p>
+                <p class="text-lg"><strong>Se lee:</strong> "No $P$" o "No es cierto que $P$".</p>
+                <div class="text-lg text-center bg-gray-50 p-4 rounded-lg shadow-inner mt-2">
+                    $$
+                    \begin{array}{|c|c|}
+                    \hline
+                    P & \neg P \\
+                    \hline
+                    V & F \\
+                    F & V \\
+                    \hline
+                    \end{array}
+                    $$
+                </div>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-8 mb-3">2. Conjunción ($\land$) - *Y*</h2>
+                <p class="text-lg">Es verdadera solo si <em>todas</em> las proposiciones que la componen son verdaderas.</p>
+                <p class="text-lg"><strong>Se lee:</strong> "$P$ y $Q$".</p>
+                <div class="text-lg text-center bg-gray-50 p-4 rounded-lg shadow-inner mt-2">
+                    $$
+                    \begin{array}{|c|c|c|}
+                    \hline
+                    P & Q & P \land Q \\
+                    \hline
+                    V & V & V \\
+                    V & F & F \\
+                    F & V & F \\
+                    F & F & F \\
+                    \hline
+                    \end{array}
+                    $$
+                </div>
+
+                <!-- Quiz Tema 4 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) Si $P$ es Falso, $\neg P$ es Falso.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) Para que $P \land Q$ sea Verdadera, ¿cómo deben ser $P$ y $Q$?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) Ambas Falsas.</li>
+                        <li>B) Ambas Verdaderas.</li>
+                        <li>C) $P$ Verdadera y $Q$ Falsa.</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) La negación de "Hoy es lunes" es "Hoy es martes".</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Si $P$ es Falso, $\neg P$ (su negación) es Verdadera.</p>
+                        <p><strong>2. B) Ambas Verdaderas.</strong> Es la única fila de la tabla de verdad de la conjunción que da $V$.</p>
+                        <p><strong>3. Falso.</strong> La negación lógica correcta es "Hoy NO es lunes".</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- --- Tema 5: Conectivas: Disyunción --- -->
+            <section id="tema-5" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">5. Conectivas: Disyunción (∨)</h1>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">3. Disyunción Inclusiva ($\lor$) - *O*</h2>
+                <p class="text-lg">Es falsa solo si <em>todas</em> las proposiciones que la componen son falsas. En todos los demás casos, es verdadera.</p>
+                <ul class="list-disc list-inside ml-4 space-y-1 text-lg">
+                    <li><strong>Se lee:</strong> "$P$ o $Q$ (o ambas)".</li>
+                    <li><strong>Significado Algorítmico:</strong> Corresponde al operador <code>OR</code>.</li>
+                </ul>
+                <div class="text-lg text-center bg-gray-50 p-4 rounded-lg shadow-inner mt-2">
+                    $$
+                    \begin{array}{|c|c|c|}
+                    \hline
+                    P & Q & P \lor Q \\
+                    \hline
+                    V & V & V \\
+                    V & F & V \\
+                    F & V & V \\
+                    F & F & F \\
+                    \hline
+                    \end{array}
+                    $$
+                </div>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-8 mb-3">Nota sobre Disyunción Exclusiva ($\oplus$ o XOR)</h2>
+                <p class="text-lg">Existe otra conectiva, la "O exclusiva" (XOR), que es verdadera si <em>solo una</em> de las proposiciones es verdadera (pero no ambas). La disyunción estándar ($\lor$) es *inclusiva*.</p>
+
+                <!-- Quiz Tema 5 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) Si $P$ es Verdadera y $Q$ es Falsa, $P \lor Q$ es Falsa.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) ¿En qué caso $P \lor Q$ es Falsa?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) Cuando $P$ y $Q$ son Verdaderas.</li>
+                        <li>B) Cuando $P$ es Verdadera y $Q$ es Falsa.</li>
+                        <li>C) Cuando $P$ y $Q$ son Falsas.</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) La conectiva $\lor$ es el "O" inclusivo.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Es Verdadera. Basta con que *una* sea verdadera para que la disyunción sea verdadera.</p>
+                        <p><strong>2. C) Cuando $P$ y $Q$ son Falsas.</strong> Es el único caso.</p>
+                        <p><strong>3. Verdadero.</strong> Acepta que $P$, $Q$, o *ambas* sean verdaderas.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- --- Tema 6: Conectivas: Implicación --- -->
+            <section id="tema-6" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">6. Conectivas: Implicación (→) 🧠</h1>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">4. Implicación ($\rightarrow$) - *SI... ENTONCES*</h2>
+                <p class="text-lg">Establece una relación de causalidad o dependencia. Es la base de las estructuras de control <code>IF-THEN</code>.</p>
+                <ul class="list-disc list-inside ml-4 space-y-1 text-lg">
+                    <li><strong>Se lee:</strong> "Si $P$, entonces $Q$".</li>
+                    <li>$P$: <strong>Antecedente</strong> (o Hipótesis)</li>
+                    <li>$Q$: <strong>Consecuente</strong> (o Conclusión)</li>
+                </ul>
+                
+                <h3 class="mt-4 text-xl font-semibold text-red-600">La única forma de que sea Falsa:</h3>
+                <p class="text-lg">Que el antecedente ($P$) sea verdadero y el consecuente ($Q$) sea falso. (Una promesa rota).</p>
+                
+                <div class="text-lg text-center bg-gray-50 p-4 rounded-lg shadow-inner mt-2">
+                    $$
+                    \begin{array}{|c|c|c|}
+                    \hline
+                    P & Q & P \rightarrow Q \\
+                    \hline
+                    V & V & V \\
+                    V & F & F \\
+                    F & V & V \\
+                    F & F & V \\
+                    \hline
+                    \end{array}
+                    $$
+                </div>
+                <p class="text-lg mt-2 italic text-gray-600">Nota: Si el antecedente ($P$) es Falso, la implicación *siempre* es Verdadera (se dice que es "verdadera por vacuidad").</p>
+
+                <!-- Quiz Tema 6 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) Si $P$ es Falso y $Q$ es Falso, $P \rightarrow Q$ es Falso.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) En $P \rightarrow Q$, a $P$ se le llama...</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) Consecuente.</li>
+                        <li>B) Antecedente.</li>
+                        <li>C) Disyunción.</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) La única forma de que $P \rightarrow Q$ sea Falsa es que $P$ sea Verdadera y $Q$ sea Falsa.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Es Verdadera. (Ver la última fila de la tabla). Si partimos de una premisa falsa, podemos concluir cualquier cosa.</p>
+                        <p><strong>2. B) Antecedente.</strong> (O hipótesis).</p>
+                        <p><strong>3. Verdadero.</strong></p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- --- Tema 7: Conectivas: Bicondicional --- -->
+            <section id="tema-7" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">7. Conectivas: Bicondicional (↔)</h1>
+                
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">5. Bicondicional ($\leftrightarrow$) - *SI Y SOLO SI*</h2>
+                <p class="text-lg">Afirma que dos proposiciones tienen el mismo valor de verdad. Es una doble implicación.</p>
+                <ul class="list-disc list-inside ml-4 space-y-1 text-lg">
+                    <li><strong>Se lee:</strong> "$P$ si y solo si $Q$".</li>
+                    <li><strong>Equivalencia:</strong> $P \leftrightarrow Q \equiv (P \rightarrow Q) \land (Q \rightarrow P)$</li>
+                </ul>
+
+                <div class="text-lg text-center bg-gray-50 p-4 rounded-lg shadow-inner mt-2">
+                    $$
+                    \begin{array}{|c|c|c|}
+                    \hline
+                    P & Q & P \leftrightarrow Q \\
+                    \hline
+                    V & V & V \\
+                    V & F & F \\
+                    F & V & F \\
+                    F & F & V \\
+                    \hline
+                    \end{array}
+                    $$
+                </div>
+                <h3 class="text-xl font-semibold text-blue-600 mt-6">Uso en Algorítmica:</h3>
+                <p class="text-lg">Se utiliza para verificar si dos condiciones booleanas son lógicamente equivalentes (si ambas son $V$ o ambas son $F$).</p>
+
+                <!-- Quiz Tema 7 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) Si $P$ es Verdadera y $Q$ es Falsa, $P \leftrightarrow Q$ es Verdadera.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) $P \leftrightarrow Q$ es Verdadera cuando...</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) $P$ y $Q$ tienen valores de verdad opuestos.</li>
+                        <li>B) $P$ y $Q$ tienen el mismo valor de verdad.</li>
+                        <li>C) $P$ es Verdadera.</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) $P \leftrightarrow Q$ es lo mismo que $P \rightarrow Q$.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Es Falsa, porque tienen valores de verdad diferentes.</p>
+                        <p><strong>2. B) $P$ y $Q$ tienen el mismo valor de verdad.</strong> (Ambas $V$ o ambas $F$).</p>
+                        <p><strong>3. Falso.</strong> El bicondicional es una implicación en *ambas* direcciones.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- --- Tema 8: Tablas de Verdad --- -->
+            <section id="tema-8" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">8. Tablas de Verdad 📋</h1>
+                
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">La Herramienta Fundamental</h2>
+                <p class="text-lg">Una tabla de verdad muestra sistemáticamente todos los posibles valores de verdad de una fórmula compuesta.</p>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Pasos Clave</h2>
+                <ol class="list-decimal list-inside ml-4 space-y-2 text-lg">
+                    <li><strong>Calcular Filas:</strong> El número de filas es $2^n$, donde $n$ es el número de variables proposicionales.</li>
+                    <li><strong>Asignar Valores:</strong> Cubrir todas las combinaciones de $V$ y $F$ para las variables.</li>
+                    <li><strong>Evaluar Subfórmulas:</strong> Calcular las conectivas internas primero (de adentro hacia afuera).</li>
+                    <li><strong>Evaluar Principal:</strong> Calcular el valor de verdad de la conectiva principal.</li>
+                </ol>
+
+                <h3 class="text-xl font-semibold text-blue-600 mt-6">Ejemplo: $(P \lor Q) \rightarrow \neg P$</h3>
+                <div class="overflow-x-auto mt-2">
+                    <table class="w-full text-center rounded-lg overflow-hidden shadow-md">
+                        <thead class="bg-blue-100">
+                            <tr>
+                                <th class="p-3 font-semibold text-blue-800">$P$</th>
+                                <th class="p-3 font-semibold text-blue-800">$Q$</th>
+                                <th class="p-3 font-semibold text-blue-800">$P \lor Q$</th>
+                                <th class="p-3 font-semibold text-blue-800">$\neg P$</th>
+                                <th class="p-3 font-semibold text-blue-800 text-orange-600">$(P \lor Q) \rightarrow \neg P$</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-blue-100 bg-white">
+                            <tr>
+                                <td class="p-3">V</td>
+                                <td class="p-3">V</td>
+                                <td class="p-3">V</td>
+                                <td class="p-3">F</td>
+                                <td class="p-3 font-bold text-orange-600">F</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3">V</td>
+                                <td class="p-3">F</td>
+                                <td class="p-3">V</td>
+                                <td class="p-3">F</td>
+                                <td class="p-3 font-bold text-orange-600">F</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3">F</td>
+                                <td class="p-3">V</td>
+                                <td class="p-3">V</td>
+                                <td class="p-3">V</td>
+                                <td class="p-3 font-bold text-orange-600">V</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3">F</td>
+                                <td class="p-3">F</td>
+                                <td class="p-3">F</td>
+                                <td class="p-3">V</td>
+                                <td class="p-3 font-bold text-orange-600">V</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Quiz Tema 8 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) Una tabla de verdad con 3 variables ($P, Q, R$) tiene 6 filas.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) ¿Cuántas filas tiene una tabla de verdad con 4 variables?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) 8</li>
+                        <li>B) 4</li>
+                        <li>C) 16</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) Para evaluar $(P \land Q) \lor R$, primero se debe evaluar $P \land Q$.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Tiene $2^n = 2^3 = 8$ filas.</p>
+                        <p><strong>2. C) 16.</strong> (Calculado como $2^4$).</p>
+                        <p><strong>3. Verdadero.</strong> Se evalúan las conectivas internas (paréntesis) primero.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- --- Tema 9: Clasificación de Fórmulas --- -->
+            <section id="tema-9" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">9. Clasificación de Fórmulas ⚖️</h1>
+                
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Naturaleza de las Expresiones Lógicas</h2>
+                <p class="text-lg">Basándonos en la columna final de una tabla de verdad, podemos clasificar cualquier fórmula:</p>
+                
+                <div class="mt-4 space-y-4">
+                    <div class="p-4 rounded-lg border-l-4 border-green-500 bg-green-50">
+                        <h3 class="text-xl font-semibold text-green-700">1. Tautología</h3>
+                        <p>La fórmula es <strong>siempre verdadera</strong> (la columna final solo tiene $V$).</p>
+                        <p class="text-md italic">Ejemplo: $P \lor \neg P$ (Ley del Tercero Excluido).</p>
+                    </div>
+                    
+                    <div class="p-4 rounded-lg border-l-4 border-red-500 bg-red-50">
+                        <h3 class="text-xl font-semibold text-red-700">2. Contradicción</h3>
+                        <p>La fórmula es <strong>siempre falsa</strong> (la columna final solo tiene $F$).</p>
+                        <p class="text-md italic">Ejemplo: $P \land \neg P$ (Ley de No Contradicción).</p>
+                    </div>
+                    
+                    <div class="p-4 rounded-lg border-l-4 border-yellow-500 bg-yellow-50">
+                        <h3 class="text-xl font-semibold text-yellow-700">3. Contingencia</h3>
+                        <p>La fórmula contiene <strong>al menos un valor verdadero y al menos un valor falso</strong>.</p>
+                        <p class="text-md italic">Ejemplo: $P \rightarrow Q$ (Depende de los valores de $P$ y $Q$).</p>
+                    </div>
+                </div>
+
+                <!-- Quiz Tema 9 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) La fórmula $P \land \neg P$ es una tautología.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) Si la tabla de verdad de una fórmula da $V, F, V, F$, ¿qué es?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) Tautología</li>
+                        <li>B) Contradicción</li>
+                        <li>C) Contingencia</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) La fórmula $P \lor \neg P$ es el ejemplo clásico de una tautología.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Es el ejemplo clásico de una contradicción (nunca puede ser V y F a la vez).</p>
+                        <p><strong>2. C) Contingencia.</strong> Porque tiene al menos un $V$ y al menos un $F$.</p>
+                        <p><strong>3. Verdadero.</strong> (Ley del Tercero Excluido: algo o es verdadero o es falso).</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- --- Tema 10: Aplicaciones en Algorítmica --- -->
+            <section id="tema-10" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">10. Aplicaciones en Algorítmica 💻</h1>
+                
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Lógica y Estructuras de Control</h2>
+                <p class="text-lg">Las conectivas lógicas son el corazón de las estructuras de control que dirigen el flujo de un programa.</p>
+
+                <div class="overflow-x-auto mt-4">
+                    <table class="w-full text-left rounded-lg overflow-hidden shadow-md">
+                        <thead class="bg-blue-100">
+                            <tr>
+                                <th class="p-4 font-semibold text-blue-800">Concepto Lógico</th>
+                                <th class="p-4 font-semibold text-blue-800">Expresión Lógica</th>
+                                <th class="p-4 font-semibold text-blue-800">Código (Python/JS)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-blue-100">
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="p-4">Negación</td>
+                                <td class="p-4">$\neg P$</td>
+                                <td class="p-4"><code>not P</code> o <code>!P</code></td>
+                            </tr>
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="p-4">Conjunción</td>
+                                <td class="p-4">$P \land Q$</td>
+                                <td class="p-4"><code>P and Q</code> o <code>P && Q</code></td>
+                            </tr>
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="p-4">Disyunción</td>
+                                <td class="p-4">$P \lor Q$</td>
+                                <td class="p-4"><code>P or Q</code> o <code>P || Q</code></td>
+                            </tr>
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="p-4">Condicional</td>
+                                <td class="p-4">$P \rightarrow Q$</td>
+                                <td class="p-4"><code>if P: Q</code> o <code>if (P) { Q }</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="text-2xl font-semibold text-blue-600 mt-8 mb-3">Optimización y Equivalencia (Leyes de De Morgan)</h2>
+                <p class="text-lg">Podemos usar equivalencias lógicas para simplificar condiciones complejas, haciendo los algoritmos más eficientes y legibles.</p>
+                <div class="text-lg text-center bg-gray-50 p-6 rounded-lg shadow-inner mt-2">
+                    <p>$\neg (P \land Q) \equiv \neg P \lor \neg Q$</p>
+                    <p>$\neg (P \lor Q) \equiv \neg P \land \neg Q$</p>
+                </div>
+
+                <!-- Quiz Tema 10 -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) La expresión <code>if (x > 5 && y < 10)</code> utiliza una disyunción.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) ¿A qué equivale $\neg (P \lor Q)$ según De Morgan?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) $\neg P \lor \neg Q$</li>
+                        <li>B) $\neg P \land \neg Q$</li>
+                        <li>C) $P \land Q$</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) <code>P || Q</code> en JavaScript es la implementación de $P \land Q$.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Utiliza una conjunción (<code>&&</code> o <code>AND</code>).</p>
+                        <p><strong>2. B) $\neg P \land \neg Q$.</strong> (La negación "se distribuye" y voltea la conectiva de $\lor$ a $\land$).</p>
+                        <p><strong>3. Falso.</strong> <code>||</code> es la Disyunción ($P \lor Q$).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- --- Tema 11: Resumen --- -->
+            <section id="tema-11" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">11. Resumen y Conclusión 🎉</h1>
+                
+                <h2 class="text-2xl font-semibold text-blue-600 mt-6 mb-3">Puntos Clave para Recordar</h2>
+                <ul class="list-disc list-inside ml-4 space-y-3 text-lg p-6 bg-blue-50 rounded-lg">
+                    <li><strong>Proposiciones:</strong> Afirmaciones que son $V$ o $F$.</li>
+                    <li><strong>Conectivas:</strong> Crean proposiciones compuestas ($\neg, \land, \lor, \rightarrow, \leftrightarrow$).</li>
+                    <li><strong>Tablas de Verdad:</strong> El método universal para determinar el valor de verdad de cualquier fórmula.</li>
+                    <li><strong>Clasificación:</strong> Toda fórmula es una Tautología, Contradicción o Contingencia.</li>
+                    <li><strong>Aplicación:</strong> La lógica proposicional es el "cerebro" detrás de las decisiones en la programación.</li>
+                </ul>
+
+                <h2 class="text-3xl font-bold text-center mt-10 text-orange-600">¡Felicidades por completar los temas!</h2>
+                <p class="text-xl text-center italic text-gray-600">Ahora puedes probar el juego o ir directo al examen final.</p>
+
+                <!-- Quiz Tema 11 (Repaso) -->
+                <div class="quiz">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Mini-Quiz Rápido 🧠</h3>
+                    <div class="quiz-question">1. (Verdadero/Falso) $P \rightarrow Q$ es Falsa cuando $P$ es Falsa y $Q$ es Verdadera.</div>
+                    <div class="quiz-question">2. (Opción Múltiple) ¿Cómo se llama una fórmula que siempre es Falsa?</div>
+                    <ul class="quiz-options list-disc list-inside ml-4">
+                        <li>A) Contingencia</li>
+                        <li>B) Tautología</li>
+                        <li>C) Contradicción</li>
+                    </ul>
+                    <div class="quiz-question">3. (Verdadero/Falso) $P \land Q$ es verdadera solo si ambas son verdaderas.</div>
+                    
+                    <button class="toggle-answer mt-4 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Mostrar Respuestas</button>
+                    <div class="quiz-answer hidden">
+                        <p><strong>1. Falso.</strong> Es Verdadera. (Solo es Falsa si $P=V$ y $Q=F$).</p>
+                        <p><strong>2. C) Contradicción.</strong></p>
+                        <p><strong>3. Verdadero.</strong></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- --- Juego: Memorama --- -->
+            <section id="juego" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">¡A Jugar! Memorama Lógico 🧩</h1>
+                <p class="text-lg">Pon a prueba tu memoria. Encuentra los pares de símbolo y su nombre. ¡Haz clic en las tarjetas para voltearlas!</p>
+                <button id="reset-game-btn" class="mt-4 mb-6 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">Reiniciar Juego</button>
+                <div id="game-message" class="text-xl font-bold text-green-600 text-center mb-4"></div>
+                <div id="game-board">
+                    <!-- Las tarjetas se generan con JavaScript -->
+                </div>
+            </section>
+
+            <!-- --- Examen Final --- -->
+            <section id="examen-final" class="mb-16 scroll-mt-20">
+                <h1 class="text-4xl font-bold text-blue-700 mb-4 pb-2 border-b-4 border-orange-500">Examen Final 🏆</h1>
+                <p class="text-lg">Demuestra lo que has aprendido. Responde las siguientes 10 preguntas.</p>
+
+                <div class="quiz !bg-orange-50 !border-orange-500 space-y-6">
+                    <div>
+                        <div class="quiz-question">1. (Verdadero/Falso) La oración "¡Qué buen curso!" es una proposición.</div>
+                    </div>
+                    <div>
+                        <div class="quiz-question">2. (Opción Múltiple) Si $P$ es V y $Q$ es F, ¿cuál es el valor de $\neg P \lor Q$?</div>
+                        <ul class="quiz-options list-disc list-inside ml-4">
+                            <li>A) Verdadero</li>
+                            <li>B) Falso</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="quiz-question">3. (Opción Múltiple) ¿Cuál conectiva es verdadera solo si ambas proposiciones son verdaderas?</div>
+                        <ul class="quiz-options list-disc list-inside ml-4">
+                            <li>A) Disyunción ($\lor$)</li>
+                            <li>B) Implicación ($\rightarrow$)</li>
+                            <li>C) Conjunción ($\land$)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="quiz-question">4. (Verdadero/Falso) Si $P$ es Falso, el valor de $P \rightarrow Q$ es siempre Verdadero, sin importar $Q$.</div>
+                    </div>
+                    <div>
+                        <div class="quiz-question">5. (Opción Múltiple) ¿Cuántas filas se necesitan para una tabla de verdad de la fórmula $(P \land Q) \rightarrow (R \lor S)$?</div>
+                        <ul class="quiz-options list-disc list-inside ml-4">
+                            <li>A) 4</li>
+                            <li>B) 8</li>
+                            <li>C) 16</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="quiz-question">6. (Verdadero/Falso) $P \leftrightarrow Q$ es Verdadera si $P$ es V y $Q$ es F.</div>
+                    </div>
+                    <div>
+                        <div class="quiz-question">7. (Opción Múltiple) La fórmula $P \land \neg P$ es un ejemplo de...</div>
+                        <ul class="quiz-options list-disc list-inside ml-4">
+                            <li>A) Tautología</li>
+                            <li>B) Contradicción</li>
+                            <li>C) Contingencia</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="quiz-question">8. (Opción Múltiple) Según las Leyes de De Morgan, $\neg(P \land Q)$ es equivalente a:</div>
+                        <ul class="quiz-options list-disc list-inside ml-4">
+                            <li>A) $\neg P \land \neg Q$</li>
+                            <li>B) $\neg P \lor \neg Q$</li>
+                            <li>C) $P \lor Q$</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="quiz-question">9. (Verdadero/Falso) La conectiva <code>||</code> (OR) en programación corresponde a la disyunción ($\lor$).</div>
+                    </div>
+                    <div>
+                        <div class="quiz-question">10. (Verdadero/Falso) $P \lor Q$ es Falsa si $P$ es V y $Q$ es F.</div>
+                    </div>
+                    
+                    <button class="toggle-answer mt-6 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-colors text-lg">Mostrar TODAS las Respuestas del Examen</button>
+                    <div class="quiz-answer hidden !bg-blue-100 !border-blue-300 space-y-2">
+                        <p><strong>1. Falso.</strong> Es una exclamación, no tiene valor de verdad.</p>
+                        <p><strong>2. B) Falso.</strong> $\neg P$ es F. $Q$ es F. Entonces $F \lor F$ es $F$.</p>
+                        <p><strong>3. C) Conjunción ($\land$).</strong></p>
+                        <p><strong>4. Verdadero.</strong> (Verdad por vacuidad).</p>
+                        <p><strong>5. C) 16.</strong> Hay 4 variables ($P, Q, R, S$), entonces $2^4 = 16$ filas.</p>
+                        <p><strong>6. Falso.</strong> Tienen valores de verdad distintos, por lo tanto, es Falsa.</p>
+                        <p><strong>7. B) Contradicción.</strong></p>
+                        <p><strong>8. B) $\neg P \lor \neg Q$.</strong></p>
+                        <p><strong>9. Verdadero.</strong></p>
+                        <p><strong>10. Falso.</strong> Es Verdadera. (Solo es falsa si ambas son F).</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // --- Renderizador de Fórmulas Matemáticas ---
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},  // Bloque
+                    {left: "$", right: "$", display: false}   // En línea
+                ]
+            });
+
+            // --- Lógica del Menú Móvil ---
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menu-toggle');
+            const mainContent = document.querySelector('main');
+            
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+            
+            // Cerrar menú al hacer clic en un enlace (en móvil)
+            sidebar.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) { // 768px es el breakpoint 'md' de Tailwind
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                });
+            });
+
+            // --- Lógica para Mostrar/Ocultar Respuestas de Quizzes ---
+            document.body.addEventListener('click', function(event) {
+                if (event.target.classList.contains('toggle-answer')) {
+                    const button = event.target;
+                    const answerDiv = button.nextElementSibling;
+                    
+                    if (answerDiv && answerDiv.classList.contains('quiz-answer')) {
+                        answerDiv.classList.toggle('hidden');
+                        if (answerDiv.classList.contains('hidden')) {
+                            button.textContent = button.textContent.replace('Ocultar', 'Mostrar');
+                        } else {
+                            button.textContent = button.textContent.replace('Mostrar', 'Ocultar');
+                        }
+                    }
+                }
+            });
+
+            // --- Lógica de Resaltado de Menú Activo (Scroll Spy) ---
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('#sidebar .nav-link');
+
+            const observerOptions = {
+                root: null, // Observa en el viewport
+                rootMargin: '-20% 0px -70% 0px', // Activa cuando la sección está en el 20% superior
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        const activeLink = document.querySelector(`#sidebar .nav-link[href="#${id}"]`);
+                        
+                        // Quitar 'active' de todos
+                        navLinks.forEach(link => link.classList.remove('active'));
+                        
+                        // Añadir 'active' al link correspondiente
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+
+            // --- Lógica del Juego de Memorama ---
+            const gameBoard = document.getElementById('game-board');
+            const resetGameBtn = document.getElementById('reset-game-btn');
+            const gameMessage = document.getElementById('game-message');
+            
+            const cardValues = [
+                { id: 'neg', content: '$ \\neg $', name: 'Negación' },
+                { id: 'conj', content: '$ \\land $', name: 'Conjunción' },
+                { id: 'disj', content: '$ \\lor $', name: 'Disyunción' },
+                { id: 'impl', content: '$ \\rightarrow $', name: 'Implicación' },
+                { id: 'bicon', content: '$ \\leftrightarrow $', name: 'Bicondicional' },
+                { id: 'taut', content: '$ V $', name: 'Tautología' },
+            ];
+            
+            // Duplicar para crear pares
+            let gameCards = [...cardValues, ...cardValues].map((card, index) => ({...card, uniqueId: index}));
+            
+            let flippedCards = [];
+            let matchedPairs = 0;
+
+            function shuffle(array) {
+                array.sort(() => Math.random() - 0.5);
+            }
+
+            function setupGame() {
+                shuffle(gameCards);
+                gameBoard.innerHTML = '';
+                gameMessage.textContent = '';
+                flippedCards = [];
+                matchedPairs = 0;
+
+                gameCards.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.classList.add('card');
+                    cardElement.dataset.id = card.id;
+                    cardElement.dataset.uniqueId = card.uniqueId;
+                    
+                    const cardContent = document.createElement('div');
+                    cardContent.classList.add('card-content');
+                    
+                    // El par será símbolo y nombre
+                    if (card.uniqueId < cardValues.length) {
+                        cardContent.innerHTML = card.content; // Símbolo
+                    } else {
+                        cardContent.innerHTML = card.name; // Nombre
+                    }
+                    
+                    cardElement.appendChild(cardContent);
+                    cardElement.addEventListener('click', flipCard);
+                    gameBoard.appendChild(cardElement);
+                });
+
+                // Renderizar KaTeX en las tarjetas creadas
+                renderMathInElement(gameBoard, {
+                    delimiters: [{left: "$", right: "$", display: false}]
+                });
+            }
+
+            function flipCard() {
+                if (flippedCards.length === 2) return; // No voltear más de 2
+                
+                const card = this;
+                if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+                card.classList.add('flipped');
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    checkForMatch();
+                }
+            }
+
+            function checkForMatch() {
+                const [card1, card2] = flippedCards;
+                
+                if (card1.dataset.id === card2.dataset.id) {
+                    // ¡Es un par!
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    matchedPairs++;
+                    flippedCards = [];
+                    
+                    if (matchedPairs === cardValues.length) {
+                        gameMessage.textContent = '¡Felicidades, ganaste!';
+                    }
+                } else {
+                    // No es un par
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        flippedCards = [];
+                    }, 1000); // Esperar 1 segundo antes de voltear
+                }
+            }
+
+            resetGameBtn.addEventListener('click', setupGame);
+
+            // Iniciar juego por primera vez
+            setupGame();
+
+        });
+    </script>
+</body>
+</html>
